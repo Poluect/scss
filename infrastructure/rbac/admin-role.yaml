@@ -3,7 +3,7 @@ kind: ServiceAccount
 metadata:
   name: tekton-triggers-sscs-sa
 secrets:
-  - name: regcred
+  - name: docker-basic-user-pass
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
