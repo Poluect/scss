@@ -1,0 +1,72 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: sscs-triggertemplate
+  namespace: sscs
+spec:
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: master
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: namespace
+      description: The namespace to create the resources
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: sscs-pipeline-run-
+        namespace: $(tt.params.namespace)
+      spec:
+        serviceAccountName: tekton-triggers-sscs-sa
+        pipelineRef:
+          name: sscs-pipeline
+        resources:
+          - name: source-repo
+            resourceSpec:
+              type: git
+              params:
+              - name: revision
+                value: $(tt.params.gitrevision)
+              - name: url
+                value: $(tt.params.gitrepositoryurl)
+          - name: image-source
+            resourceSpec:
+              type: image
+              params:
+                - name: url
+                  value: skifdh/test:latest # docker-repo-location.com/repo:sscs
+          - name: event-to-sink
+            resourceSpec:
+              type: cloudEvent
+              params:
+                - name: targetURI
+                  value: http://event-display.sscs.svc.cluster.local
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: sscs-pipelinebinding
+  namespace: sscs
+spec:
+  params:
+    - name: gitrevision
+      value: $(body.head_commit.id)
+    - name: namespace
+      value: sscs
+    - name: gitrepositoryurl
+      value: "https://github.com/$(body.repository.full_name)"
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: sscs-listener
+  namespace: sscs
+spec:
+  serviceAccountName: tekton-triggers-sscs-sa
+  triggers:
+    - bindings:
+      - ref: sscs-pipelinebinding
+      template:
+        ref: sscs-triggertemplate
