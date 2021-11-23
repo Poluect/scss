@@ -118,7 +118,7 @@ spec:
   check:
     image: golang
     command: ["go"]
-    workingDir: "$(resources.source-repo.path)"
+    workingDir: "$(resources.source-repo.path)/src"
     args: ['test', "./..."]
 ---
 # Finally, we need something to receive our cloudevent announcing success!
