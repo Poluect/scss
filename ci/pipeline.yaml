@@ -100,6 +100,9 @@ spec:
         type: image
   steps:
     - name: build-and-push
+      env:
+        - name: "DOCKER_CONFIG"
+          value: "/tekton/home/.docker/"
       image: gcr.io/kaniko-project/executor:v0.16.0
       command:
         - /kaniko/executor
