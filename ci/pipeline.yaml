@@ -30,6 +30,8 @@ spec:
       params:
         - name: pathToContext
           value: /workspace/source-repo
+        - name: pathToDockerFile
+          value: $(resources.inputs.source-repo.path)/build/Dockerfile
       resources:
         inputs:
           - name: source-repo
