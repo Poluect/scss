@@ -51,3 +51,12 @@ kubectl -n sscs apply -f ./infrastructure/secret.yaml
 # replace github org, user, external domain
 kubectl -n sscs apply -f ./infrastructure/webhook-run.yaml
 ```
+
+Docker registry access:
+```bash
+kubectl create secret docker-registry regcred \
+                    --docker-server=<your-registry-server> \
+                    --docker-username=<your-name> \
+                    --docker-password=<your-pword> \
+                    --docker-email=<your-email>
+```

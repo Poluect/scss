@@ -34,6 +34,22 @@ rules:
   - list
   - delete
   - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - get
+  - list
+  - delete
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
 ---
 apiVersion: v1
 kind: ServiceAccount
