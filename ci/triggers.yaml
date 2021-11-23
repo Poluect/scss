@@ -36,7 +36,7 @@ spec:
               type: image
               params:
                 - name: url
-                  value: docker.io/skifdh/test:latest # docker-repo-location.com/repo:sscs
+                  value: index.docker.io/skifdh/test:latest # docker-repo-location.com/repo:sscs
           - name: event-to-sink
             resourceSpec:
               type: cloudEvent
