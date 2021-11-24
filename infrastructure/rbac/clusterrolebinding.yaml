@@ -9,4 +9,4 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tekton-triggers-sscs-clusterrole
+  name: tekton-triggers-eventlistener-clusterrole
