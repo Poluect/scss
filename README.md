@@ -58,4 +58,3 @@ kubectl patch configmap chains-config -n tekton-chains -p='{"data":{"artifacts.t
 kubectl patch configmap chains-config -n tekton-chains -p='{"data":{"artifacts.taskrun.storage": "oci"}}'
 kubectl patch configmap chains-config -n tekton-chains -p='{"data":{"transparency.enabled": "true"}}'
 ```
- 
