@@ -15,6 +15,7 @@ func (h tyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.Printf("starting the server on port :8080!")
 	err := http.ListenAndServe(":8080", tyHandler{})
 	log.Fatal(err)
 }
