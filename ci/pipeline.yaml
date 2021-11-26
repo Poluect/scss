@@ -98,18 +98,33 @@ spec:
     outputs:
       - name: builtImage
         type: image
+  results:
+  - name: IMAGE_DIGEST
+    description: Digest of the image just built.
+  - name: IMAGE_URL
+    description: URL of the image just built.
   steps:
     - name: build-and-push
       env:
         - name: "DOCKER_CONFIG"
           value: "/tekton/home/.docker/"
-      image: gcr.io/kaniko-project/executor:v0.16.0
+      image: gcr.io/kaniko-project/executor:v1.5.1
       command:
         - /kaniko/executor
       args:
         - --dockerfile=$(params.pathToDockerFile)
         - --destination=$(resources.outputs.builtImage.url)
         - --context=$(params.pathToContext)
+        - --digest-file=$(results.IMAGE_DIGEST.path)
+      securityContext:
+        runAsUser: 0
+    - name: write-url
+      image: bash
+      script: |
+        set -e
+        echo $(resources.outputs.builtImage.url) | tee $(results.IMAGE_URL.path)
+      securityContext:
+        runAsUser: 0
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: Condition
