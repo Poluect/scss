@@ -74,20 +74,15 @@ spec:
   steps:
     - name: run-kubectl
       image: lachlanevenson/k8s-kubectl
-      command: ["sh"]
+      command: ["kubectl"]
       args:
-        - -ce
-        - |
-          set -ex
-          kubectl run podinfo --image $(inputs.resources.image-source.url) -o yaml --dry-run | kubectl apply -f -
-      # args:
-      #   - "run"
-      #   - "tekton-triggers-built-me"
-      #   - "--image"
-      #   - "$(resources.inputs.image-source.url)"
-      #   - "--namespace"
-      #   - "$(params.namespace)"
-      #   - "--env=PORT=8080"
+        - "run"
+        - "tekton-triggers-built-me"
+        - "--image"
+        - "$(resources.inputs.image-source.url)"
+        - "--namespace"
+        - "$(params.namespace)"
+        - "--env=PORT=8080"
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
