@@ -29,33 +29,38 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Get dependencies
-        run: make -C src download
+        working-directory: ./src
+        run: make download
 
       - name: Lint
+        working-directory: ./src
         run: |
-          pwd
-          result="$(make -C src lint)"
+          result="$(make  lint)"
           echo "$result"
           [ -n "$(echo "$result" | grep 'diff -u')" ] && exit 1 || exit 0
 
       - name: Build
-        run: make -C src build
+        working-directory: ./src
+        run: make build
 
       - name: Test
+        working-directory: ./src
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: make -C src test
+        run: make test
 
       - name: Coverage
+        working-directory: ./src
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: make -C src coverage-out
+        run: make coverage-out
 
       - name: Upload Code Coverage
+        working-directory: ./src
         uses: codecov/codecov-action@v2.1.0
         with:
-          # token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./src/coverage.out
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
@@ -85,8 +90,9 @@ jobs:
 
       - name: Set release variables
         id: release-vars
+        working-directory: ./src
         run: |
-          make -C src release-vars > /tmp/spiffe-vault-release-vars.env
+          make release-vars > /tmp/spiffe-vault-release-vars.env
           source /tmp/spiffe-vault-release-vars.env
           if [[ -n "$LDFLAGS" ]]; then
             echo "::set-output name=LDFLAGS::$LDFLAGS"
