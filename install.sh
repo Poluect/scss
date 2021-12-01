@@ -17,3 +17,7 @@ kubectl -n sscs apply -f ./infrastructure/ingress-nginx.yaml
 kubectl -n sscs apply -f ./infrastructure/secret.yaml
 # replace github org, user, external domain
 kubectl -n sscs apply -f ./infrastructure/webhook-run.yaml
+
+kubectl create namespace sscs-app
+kubectl label namespaces sscs-app securesystemsengineering.connaisseur/webhook=validate
+

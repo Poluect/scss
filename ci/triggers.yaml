@@ -42,7 +42,7 @@ spec:
               type: cloudEvent
               params:
                 - name: targetURI
-                  value: http://event-display.sscs.svc.cluster.local
+                  value: http://event-display.sscs.svc.cluster.local:8080
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding

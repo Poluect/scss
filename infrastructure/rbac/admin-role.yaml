@@ -35,7 +35,7 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: sscs-pod-create
-  namespace: sscs
+  namespace: sscs-app
 rules:
 - apiGroups: [""]
   resources: ["pods"]
