@@ -101,13 +101,6 @@ jobs:
           fi
           rm -f /tmp/spiffe-vault-release-vars.env
 
-      # Download and invoke cyclonedx-gomod in a single step
-      - name: Generate SBOM
-        uses: CycloneDX/gh-gomod-generate-sbom@v1
-        with:
-          version: v1
-          args: mod -json -output gomod-sbom.json ./src
-
       - name: Release ${{ (!startsWith(github.ref, 'refs/tags/') && 'snapshot') || '' }}
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -132,6 +125,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      - name: Generate go.mod SBOM
+        uses: CycloneDX/gh-gomod-generate-sbom@v1
+        with:
+          version: v1
+          args: mod -json -output gomod-sbom.json ./src
+
       - name: Generate provenance for Release
         uses: philips-labs/slsa-provenance-action@v0.4.0
         with:
