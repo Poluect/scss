@@ -101,6 +101,13 @@ jobs:
           fi
           rm -f /tmp/spiffe-vault-release-vars.env
 
+      # Download and invoke cyclonedx-gomod in a single step
+      - name: Generate SBOM
+        uses: CycloneDX/gh-gomod-generate-sbom@v1
+        with:
+          version: v1
+          args: mod -json -output gomod-sbom.json ./src
+
       - name: Release ${{ (!startsWith(github.ref, 'refs/tags/') && 'snapshot') || '' }}
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -131,5 +138,6 @@ jobs:
           artifact_path: release-assets
           output_path: "provenance.json"
           tag_name: ${{ github.ref_name }}
+          extra_materials: "gomod-sbom.json"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
