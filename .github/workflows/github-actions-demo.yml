@@ -142,6 +142,11 @@ jobs:
           artifact_path: release-assets
           output_path: "provenance.json"
           tag_name: ${{ github.ref_name }}
-          extra_materials: "gomod-sbom.json"
+          # extra_materials: "gomod-sbom.json"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Upload provenance
+        uses: actions/upload-artifact@v2
+        with:
+          path: gomod-sbom.json
