@@ -125,6 +125,11 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 0
+
       - name: Generate go.mod SBOM
         uses: CycloneDX/gh-gomod-generate-sbom@v1
         with:
