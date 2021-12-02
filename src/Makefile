@@ -14,7 +14,8 @@ ifeq ($(DIFF), 1)
     GIT_TREESTATE = "dirty"
 endif
 
-PKG=github.com/Poluect/scss/src
+# PKG=github.com/Poluect/scss/main
+PKG=main
 LDFLAGS="-X $(PKG).GitVersion=$(GIT_VERSION) -X $(PKG).gitCommit=$(GIT_HASH) -X $(PKG).gitTreeState=$(GIT_TREESTATE) -X $(PKG).buildDate=$(BUILD_DATE)"
 
 GO_BUILD_FLAGS := -trimpath -ldflags $(LDFLAGS)
@@ -60,7 +61,7 @@ coverage-html: coverage.out ## Ouput code coverage as HTML
 
 .PHONY: build
 build: 
-	CGO_ENABLED=0 go build $(GO_BUILD_FLAGS) -o bin/sscs .
+	CGO_ENABLED=0 go build -mod=readonly $(GO_BUILD_FLAGS) -o bin/sscs .
 
 .PHONY: image
 image: ## build the binary in a docker image
