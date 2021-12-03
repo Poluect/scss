@@ -144,7 +144,7 @@ jobs:
           INPUT_COMMANDS: "-p ./src"
 
       - name: Generate provenance
-      - uses: anchore/sbom-action/publish-sbom@v0
+        uses: anchore/sbom-action/publish-sbom@v0
         with:
           sbom-artifact-match: ".*\\.spdx$"
 
