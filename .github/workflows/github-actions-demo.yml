@@ -143,12 +143,13 @@ jobs:
         env:
           INPUT_COMMANDS: "-p ./src"
 
-      - name: Generate provenance for Release
-        uses: philips-labs/slsa-provenance-action@v0.4.0
+      - name: Generate provenance
+        uses: slsa-framework/github-actions-demo@main
+        # uses: philips-labs/slsa-provenance-action@v0.4.0
         with:
           artifact_path: release-assets
           output_path: "provenance.json"
-          tag_name: ${{ github.ref_name }}
+          # tag_name: ${{ github.ref_name }}
           # extra_materials: "gomod-sbom.json"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
