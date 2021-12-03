@@ -137,9 +137,9 @@ jobs:
       #     args: mod -json -output gomod-sbom.json ./src
 
       - name: Generate go.mod SBOM
-        uses: niravpatel27/gh-action-spdx-sbom-generator@v1.0.0
+        uses: Poluect/gh-action-spdx-sbom-generator@v1.0.1
         with:
-          version: "0.0.3"
+          version: "0.0.9"
         env:
           INPUT_COMMANDS: "-p ./src"
 
