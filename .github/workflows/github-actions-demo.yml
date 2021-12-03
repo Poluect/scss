@@ -181,6 +181,46 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/download-artifact@v2
+        with:
+          name: gomod-provenance
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: oci-provenance
+
+      - name: Publish provenance
+        uses: anchore/sbom-action/publish-sbom@v0
+        with:
+          sbom-artifact-match: ".*\\.spdx$"
+
+      - name: Generate provenance
+        # uses: slsa-framework/github-actions-demo@main
+        uses: philips-labs/slsa-provenance-action@v0.4.0
+        with:
+          artifact_path: release-assets
+          output_path: "provenance.json"
+          tag_name: ${{ github.ref_name }}
+          # extra_materials: "gomod-sbom.json"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      # - name: Upload provenance
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     path: bom-go-mod.spdx
+      # path: gomod-sbom.json
+
+  generate-provenance:
+    needs: build
+    name: Generate build provenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 0
+
       # - name: Generate go.mod SBOM
       #   uses: CycloneDX/gh-gomod-generate-sbom@v1
       #   with:
@@ -194,57 +234,20 @@ jobs:
         env:
           INPUT_COMMANDS: "-p ./src"
 
-      - name: Generate provenance
-        uses: anchore/sbom-action/publish-sbom@v0
-        with:
-          sbom-artifact-match: ".*\\.spdx$"
-
-      # - name: Generate provenance
-      #   uses: slsa-framework/github-actions-demo@main
-      #   # uses: philips-labs/slsa-provenance-action@v0.4.0
-      #   with:
-      #     artifact_path: release-assets
-      #     output_path: "provenance.json"
-      #     # tag_name: ${{ github.ref_name }}
-      #     # extra_materials: "gomod-sbom.json"
-      #   env:
-      #     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Upload provenance
-        uses: actions/upload-artifact@v2
-        with:
-          path: bom-go-mod.spdx
-          # path: gomod-sbom.json
-
-  generate-provenance:
-    needs: build
-    name: Generate build provenance
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2.4.0
-        with:
-          fetch-depth: 0
-
-      - name: Generate go.mod SBOM
-        uses: Poluect/gh-action-spdx-sbom-generator@v1.0.1
-        with:
-          version: "0.0.9"
-        env:
-          INPUT_COMMANDS: "-p ./src"
-
       - name: Generate oci artifact SBOM
         uses: anchore/sbom-action@v0
         with:
           image: skifdh/test@${{ needs.build.outputs.image_digest }}
-          artifact-name: oci-sbom.spdx
+          artifact-name: oci-provenance
           registry-username: ${{ secrets.DOCKER_USERNAME }}
           registry-password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Upload provenance
         uses: actions/upload-artifact@v2
         with:
-          name: provenance
+          name: gomod-provenance
           path: |
             bom-go-mod.spdx
             oci-sbom.spdx
+
+# slsa-provenance generate "-artifact_path" "release-assets" "-output_path" "provenance.json" "-github_context" "{ \"token\": \"***\", \"job\": \"provenance\", \"ref\": \"refs/tags/v0.0.9\", \"sha\": \"b97d4fff4076bced8026feff4774f3d0997f70cc\", \"repository\": \"Poluect/scss\", \"repository_owner\": \"Poluect\", \"repositoryUrl\": \"git://github.com/Poluect/scss.git\", \"run_id\": \"1534891439\", \"run_number\": \"27\", \"retention_days\": \"90\", \"run_attempt\": \"1\", \"actor\": \"Poluect\", \"workflow\": \"Continuous integration\", \"head_ref\": \"\", \"base_ref\": \"\", \"event_name\": \"push\", \"event\": { \"after\": \"b97d4fff4076bced8026feff4774f3d0997f70cc\", \"base_ref\": null, \"before\": \"0000000000000000000000000000000000000000\", \"commits\": [], \"compare\": \"https://github.com/Poluect/scss/compare/v0.0.9\", \"created\": true, \"deleted\": false, \"forced\": false, \"head_commit\": { \"author\": { \"email\": \"dmitry.harkaviy@gmail.com\", \"name\": \"Dmitry Harkaviy\", \"username\": \"Poluect\" }, \"committer\": { \"email\": \"dmitry.harkaviy@gmail.com\", \"name\": \"Dmitry Harkaviy\", \"username\": \"Poluect\" }, \"distinct\": true, \"id\": \"b97d4fff4076bced8026feff4774f3d0997f70cc\", \"message\": \"github actions: fix release workdir\", \"timestamp\": \"2021-12-01T19:31:50+02:00\", \"tree_id\": \"75002c99b120fdc92581f9d224750c6e0c512256\", \"url\": \"https://github.com/Poluect/scss/commit/b97d4fff4076bced8026feff4774f3d0997f70cc\" }, \"pusher\": { \"email\": \"dmitry.harkaviy@gmail.com\", \"name\": \"Poluect\" }, \"ref\": \"refs/tags/v0.0.9\", \"repository\": { \"allow_forking\": true, \"archive_url\": \"https://api.github.com/repos/Poluect/scss/{archive_format}{/ref}\", \"archived\": false, \"assignees_url\": \"https://api.github.com/repos/Poluect/scss/assignees{/user}\", \"blobs_url\": \"https://api.github.com/repos/Poluect/scss/git/blobs{/sha}\", \"branches_url\": \"https://api.github.com/repos/Poluect/scss/branches{/branch}\", \"clone_url\": \"https://github.com/Poluect/scss.git\", \"collaborators_url\": \"https://api.github.com/repos/Poluect/scss/collaborators{/collaborator}\", \"comments_url\": \"https://api.github.com/repos/Poluect/scss/comments{/number}\", \"commits_url\": \"https://api.github.com/repos/Poluect/scss/commits{/sha}\", \"compare_url\": \"https://api.github.com/repos/Poluect/scss/compare/{base}...{head}\", \"contents_url\": \"https://api.github.com/repos/Poluect/scss/contents/{+path}\", \"contributors_url\": \"https://api.github.com/repos/Poluect/scss/contributors\", \"created_at\": 1637588359, \"default_branch\": \"master\", \"deployments_url\": \"https://api.github.com/repos/Poluect/scss/deployments\", \"description\": null, \"disabled\": false, \"downloads_url\": \"https://api.github.com/repos/Poluect/scss/downloads\", \"events_url\": \"https://api.github.com/repos/Poluect/scss/events\", \"fork\": false, \"forks\": 0, \"forks_count\": 0, \"forks_url\": \"https://api.github.com/repos/Poluect/scss/forks\", \"full_name\": \"Poluect/scss\", \"git_commits_url\": \"https://api.github.com/repos/Poluect/scss/git/commits{/sha}\", \"git_refs_url\": \"https://api.github.com/repos/Poluect/scss/git/refs{/sha}\", \"git_tags_url\": \"https://api.github.com/repos/Poluect/scss/git/tags{/sha}\", \"git_url\": \"git://github.com/Poluect/scss.git\", \"has_downloads\": true, \"has_issues\": true, \"has_pages\": false, \"has_projects\": true, \"has_wiki\": true, \"homepage\": null, \"hooks_url\": \"https://api.github.com/repos/Poluect/scss/hooks\", \"html_url\": \"https://github.com/Poluect/scss\", \"id\": 430721709, \"is_template\": false, \"issue_comment_url\": \"https://api.github.com/repos/Poluect/scss/issues/comments{/number}\", \"issue_events_url\": \"https://api.github.com/repos/Poluect/scss/issues/events{/number}\", \"issues_url\": \"https://api.github.com/repos/Poluect/scss/issues{/number}\", \"keys_url\": \"https://api.github.com/repos/Poluect/scss/keys{/key_id}\", \"labels_url\": \"https://api.github.com/repos/Poluect/scss/labels{/name}\", \"language\": \"Go\", \"languages_url\": \"https://api.github.com/repos/Poluect/scss/languages\", \"license\": null, \"master_branch\": \"master\", \"merges_url\": \"https://api.github.com/repos/Poluect/scss/merges\", \"milestones_url\": \"https://api.github.com/repos/Poluect/scss/milestones{/number}\", \"mirror_url\": null, \"name\": \"scss\", \"node_id\": \"R_kgDOGaxKrQ\", \"notifications_url\": \"https://api.github.com/repos/Poluect/scss/notifications{?since,all,participating}\", \"open_issues\": 0, \"open_issues_count\": 0, \"owner\": { \"avatar_url\": \"https://avatars.githubusercontent.com/u/12843897?v=4\", \"email\": \"dmitry.harkaviy@gmail.com\", \"events_url\": \"https://api.github.com/users/Poluect/events{/privacy}\", \"followers_url\": \"https://api.github.com/users/Poluect/followers\", \"following_url\": \"https://api.github.com/users/Poluect/following{/other_user}\", \"gists_url\": \"https://api.github.com/users/Poluect/gists{/gist_id}\", \"gravatar_id\": \"\", \"html_url\": \"https://github.com/Poluect\", \"id\": 12843897, \"login\": \"Poluect\", \"name\": \"Poluect\", \"node_id\": \"MDQ6VXNlcjEyODQzODk3\", \"organizations_url\": \"https://api.github.com/users/Poluect/orgs\", \"received_events_url\": \"https://api.github.com/users/Poluect/received_events\", \"repos_url\": \"https://api.github.com/users/Poluect/repos\", \"site_admin\": false, \"starred_url\": \"https://api.github.com/users/Poluect/starred{/owner}{/repo}\", \"subscriptions_url\": \"https://api.github.com/users/Poluect/subscriptions\", \"type\": \"User\", \"url\": \"https://api.github.com/users/Poluect\" }, \"private\": false, \"pulls_url\": \"https://api.github.com/repos/Poluect/scss/pulls{/number}\", \"pushed_at\": 1638528902, \"releases_url\": \"https://api.github.com/repos/Poluect/scss/releases{/id}\", \"size\": 65, \"ssh_url\": \"git@github.com:Poluect/scss.git\", \"stargazers\": 0, \"stargazers_count\": 0, \"stargazers_url\": \"https://api.github.com/repos/Poluect/scss/stargazers\", \"statuses_url\": \"https://api.github.com/repos/Poluect/scss/statuses/{sha}\", \"subscribers_url\": \"https://api.github.com/repos/Poluect/scss/subscribers\", \"subscription_url\": \"https://api.github.com/repos/Poluect/scss/subscription\", \"svn_url\": \"https://github.com/Poluect/scss\", \"tags_url\": \"https://api.github.com/repos/Poluect/scss/tags\", \"teams_url\": \"https://api.github.com/repos/Poluect/scss/teams\", \"topics\": [], \"trees_url\": \"https://api.github.com/repos/Poluect/scss/git/trees{/sha}\", \"updated_at\": \"2021-12-03T10:18:13Z\", \"url\": \"https://github.com/Poluect/scss\", \"visibility\": \"public\", \"watchers\": 0, \"watchers_count\": 0 }, \"sender\": { \"avatar_url\": \"https://avatars.githubusercontent.com/u/12843897?v=4\", \"events_url\": \"https://api.github.com/users/Poluect/events{/privacy}\", \"followers_url\": \"https://api.github.com/users/Poluect/followers\", \"following_url\": \"https://api.github.com/users/Poluect/following{/other_user}\", \"gists_url\": \"https://api.github.com/users/Poluect/gists{/gist_id}\", \"gravatar_id\": \"\", \"html_url\": \"https://github.com/Poluect\", \"id\": 12843897, \"login\": \"Poluect\", \"node_id\": \"MDQ6VXNlcjEyODQzODk3\", \"organizations_url\": \"https://api.github.com/users/Poluect/orgs\", \"received_events_url\": \"https://api.github.com/users/Poluect/received_events\", \"repos_url\": \"https://api.github.com/users/Poluect/repos\", \"site_admin\": false, \"starred_url\": \"https://api.github.com/users/Poluect/starred{/owner}{/repo}\", \"subscriptions_url\": \"https://api.github.com/users/Poluect/subscriptions\", \"type\": \"User\", \"url\": \"https://api.github.com/users/Poluect\" } }, \"server_url\": \"https://github.com\", \"api_url\": \"https://api.github.com\", \"graphql_url\": \"https://api.github.com/graphql\", \"ref_name\": \"v0.0.9\", \"ref_protected\": false, \"ref_type\": \"tag\", \"secret_source\": \"Actions\", \"workspace\": \"/home/runner/work/scss/scss\", \"action\": \"__philips-labs_slsa-provenance-action\", \"event_path\": \"/home/runner/work/_temp/_github_workflow/event.json\", \"action_repository\": \"philips-labs/slsa-provenance-action\", \"action_ref\": \"v0.4.0\", \"path\": \"/home/runner/work/_temp/_runner_file_commands/add_path_4365ee02-7364-4d7a-bc2f-c1f63a30040f\", \"env\": \"/home/runner/work/_temp/_runner_file_commands/set_env_4365ee02-7364-4d7a-bc2f-c1f63a30040f\" }" "-runner_context" "{ \"os\": \"Linux\", \"arch\": \"X64\", \"name\": \"Hosted Agent\", \"tool_cache\": \"/opt/hostedtoolcache\", \"temp\": \"/home/runner/work/_temp\", \"workspace\": \"/home/runner/work/scss\" }" "-tag_name" "v0.0.9" "-extra_materials" ""
