@@ -1,3 +1,4 @@
 src/bin/*
 src/coverage.out
 gomod-sbom.json
+bom-go-mod.spdx
