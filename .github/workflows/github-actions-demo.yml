@@ -49,13 +49,6 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: make test
 
-      - name: Generate go.mod SBOM
-        uses: niravpatel27/gh-action-spdx-sbom-generator@v1.0.0
-        with:
-          version: "0.0.3"
-        env:
-          INPUT_COMMANDS: "-p ./src"
-
       - name: Coverage
         working-directory: ./src
         env:
