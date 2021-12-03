@@ -130,11 +130,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      # - name: Generate go.mod SBOM
+      #   uses: CycloneDX/gh-gomod-generate-sbom@v1
+      #   with:
+      #     version: v1
+      #     args: mod -json -output gomod-sbom.json ./src
+
       - name: Generate go.mod SBOM
-        uses: CycloneDX/gh-gomod-generate-sbom@v1
+        uses: niravpatel27/gh-action-spdx-sbom-generator@v1.0.0
         with:
-          version: v1
-          args: mod -json -output gomod-sbom.json ./src
+          version: "0.0.3"
+          command: "-p ./src"
 
       - name: Generate provenance for Release
         uses: philips-labs/slsa-provenance-action@v0.4.0
@@ -149,4 +155,5 @@ jobs:
       - name: Upload provenance
         uses: actions/upload-artifact@v2
         with:
-          path: gomod-sbom.json
+          path: bom-go-mod.spdx
+          # path: gomod-sbom.json
