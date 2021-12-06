@@ -220,7 +220,7 @@ jobs:
         uses: i3h/download-release-asset@v1
         with:
           owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository }}
+          repo: scss
           tag: ${{ github.ref_name }}
           file: /.*/
           path: release-assets
