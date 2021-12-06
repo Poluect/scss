@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.4.0
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+
       - name: Cache Go modules
         uses: actions/cache@v2.1.7
         id: go-mod-cache
@@ -99,6 +102,15 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Sign image with a key
+        run: |
+          echo ${COSIGN_KEY} > /tmp/my_cosign.key && \
+          cosign sign --key /tmp/my_cosign.key ${TAGS}
+        env:
+          TAGS: ${{ steps.docker_prep.outputs.image }}@${{ steps.docker_build.outputs.digest }}
+          COSIGN_KEY: ${{secrets.COSIGN_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
 
       - name: Coverage
         working-directory: ./src
@@ -212,10 +224,9 @@ jobs:
           tag: ${{ github.ref }}
           body: "oci SBOM"
 
-      # - name: Publish provenance
-      #   uses: anchore/sbom-action/publish-sbom@v0
-      #   with:
-      #     sbom-artifact-match: ".*\\.spdx$"
+      # slsa-provenance-action actually tries to download assets itself for generating sbom file,
+      # but so far it causes endless 400 errors when calling DownloadReleaseAsset function from github
+      # sdk, for this reason downloading and uploading of release assets is taken out from slsa-provenance-action
       - name: Download Release assets
         uses: i3h/download-release-asset@v1
         with:
@@ -225,12 +236,6 @@ jobs:
           file: /.*/
           path: release-assets
           token: ${{ secrets.GITHUB_TOKEN }}
-        # uses: Legion2/download-release-action@v2.1.0
-        # with:
-        #   repository: ${{ github.repository }}
-        #   tag: ${{ github.ref_name }}
-        #   path: release-assets
-        #   token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate provenance
         # uses: slsa-framework/github-actions-demo@main
@@ -251,12 +256,6 @@ jobs:
           asset_name: build.provenance
           tag: ${{ github.ref }}
           body: "binary SBOM"
-
-      # - name: Upload provenance
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     path: bom-go-mod.spdx
-      # path: gomod-sbom.json
 
   generate-provenance:
     needs: build
