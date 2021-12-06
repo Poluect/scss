@@ -216,14 +216,21 @@ jobs:
       #   uses: anchore/sbom-action/publish-sbom@v0
       #   with:
       #     sbom-artifact-match: ".*\\.spdx$"
-
-      - name: Download CLI
-        uses: Legion2/download-release-action@v2.1.0
+      - name: Download Release assets
+        uses: i3h/download-release-asset@v1
         with:
-          repository: ${{ github.repository }}
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.repository }}
           tag: ${{ github.ref_name }}
+          file: /.*/
           path: release-assets
           token: ${{ secrets.GITHUB_TOKEN }}
+        # uses: Legion2/download-release-action@v2.1.0
+        # with:
+        #   repository: ${{ github.repository }}
+        #   tag: ${{ github.ref_name }}
+        #   path: release-assets
+        #   token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate provenance
         # uses: slsa-framework/github-actions-demo@main
