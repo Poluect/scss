@@ -223,10 +223,19 @@ jobs:
         with:
           artifact_path: release-assets
           output_path: "provenance.json"
-          tag_name: ${{ github.ref_name }}
+          # tag_name: ${{ github.ref_name }}
           # extra_materials: "gomod-sbom.json"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Upload binary SBOM to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: provenance.json
+          asset_name: provenance.json
+          tag: ${{ github.ref }}
+          body: "binary SBOM"
 
       # - name: Upload provenance
       #   uses: actions/upload-artifact@v2
