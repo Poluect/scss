@@ -217,16 +217,16 @@ jobs:
       #   with:
       #     sbom-artifact-match: ".*\\.spdx$"
 
-      # - name: Generate provenance
-      #   # uses: slsa-framework/github-actions-demo@main
-      #   uses: philips-labs/slsa-provenance-action@v0.4.0
-      #   with:
-      #     artifact_path: release-assets
-      #     output_path: "provenance.json"
-      #     tag_name: ${{ github.ref_name }}
-      #     # extra_materials: "gomod-sbom.json"
-      #   env:
-      #     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Generate provenance
+        # uses: slsa-framework/github-actions-demo@main
+        uses: philips-labs/slsa-provenance-action@v0.4.0
+        with:
+          artifact_path: release-assets
+          output_path: "provenance.json"
+          tag_name: ${{ github.ref_name }}
+          # extra_materials: "gomod-sbom.json"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       # - name: Upload provenance
       #   uses: actions/upload-artifact@v2
