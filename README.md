@@ -8,6 +8,27 @@ So then binary files can be validated using cosign (with checksums.txt and check
 COSIGN_EXPERIMENTAL=1 cosign verify-blob -signature ~/Downloads/checksums.txt.sig ~/Downloads/checksums.txt
 ```
 
+### Fork instructions:
+
+Set following secrets in your repo:
+
+- DOCKER_IMAGE (`mycollection/myapp`)
+- DOCKER_USERNAME
+- DOCKER_PASSWORD
+- COSIGN_KEY
+- COSIGN_PASSWORD
+- CODECOV_TOKEN
+
+In order to generate cosign token:
+```bash
+# in case cosign not installed
+go install github.com/sigstore/cosign/cmd/cosign@v1.4.0
+
+cosign generate-key-pair
+```
+
+Codecov step is standalone, impact only build step, and can be easily commented
+
 ## Preparing before installing scss
 
 Install core:
