@@ -105,16 +105,15 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
-      # - name: Write signing key to disk (only needed for `cosign sign --key`)
-      #   run: echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+      - name: Write signing key to disk (only needed for `cosign sign --key`)
+        run: echo "${{ secrets.COSIGN_KEY }}" > cosign.key
 
       - name: Sign image with a key
         run: |
-          cosign sign --oidc-issuer https://token.actions.githubusercontent.com ${TAGS}
+          cosign sign --key cosign.key ${TAGS}
         env:
           TAGS: ${{ steps.docker_prep.outputs.image }}@${{ steps.docker_build.outputs.digest }}
-          # COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-          COSIGN_EXPERIMENTAL: 1
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
 
       - name: Coverage
         working-directory: ./src
