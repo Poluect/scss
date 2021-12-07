@@ -10,9 +10,8 @@ COSIGN_EXPERIMENTAL=1 cosign verify-blob -signature ~/Downloads/checksums.txt.si
 
 ### Fork instructions:
 
-Set following secrets in your repo:
+1. Set following secrets in your repo:
 
-- DOCKER_IMAGE (`mycollection/myapp`)
 - DOCKER_USERNAME
 - DOCKER_PASSWORD
 - COSIGN_KEY
@@ -26,8 +25,11 @@ go install github.com/sigstore/cosign/cmd/cosign@v1.4.0
 
 cosign generate-key-pair
 ```
+, then copy generated key and password to github secrets
 
-Codecov step is standalone, impact only build step, and can be easily commented
+2. In `.github/workflows/github-actions-demo.yml` replace `skifdh/test` with your own docker image path.
+
+3. Codecov step is standalone, impact only build step, and can be easily commented
 
 ## Preparing before installing scss
 
