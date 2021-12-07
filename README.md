@@ -1,3 +1,13 @@
+## Github actions
+
+When pushing a tag ti github, github actions automatically creates release for it, with signing of release assets using github workflow identity (see [this](https://shibumi.dev/posts/first-look-into-cosign/) and [this](https://shibumi.dev/posts/keyless-signatures-with-github-actions/) for more info)
+
+So then binary files can be validated using cosign (with checksums.txt and checksubs.txt.sig upload from github release assets):
+
+```bash
+COSIGN_EXPERIMENTAL=1 cosign verify-blob -signature ~/Downloads/checksums.txt.sig ~/Downloads/checksums.txt
+```
+
 ## Preparing before installing scss
 
 Install core:
