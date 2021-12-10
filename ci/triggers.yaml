@@ -98,23 +98,25 @@ spec:
     - name: build_artifact
       interceptors:
         - cel:
+            filter: 'body.ref.contains("refs/heads/") && $(header.X-Github-Event) == "push"'
+        - cel:
             overlays:
               - key: body-json
                 expression: "body.marshalJSON()"
               - key: ref-name
                 expression: "body.ref.split('/')[2]"
               - key: docker-tag
-                expression: "$(body.head_commit.id)"
+                expression: "body.head_commit.id"
               - key: build-type
                 expression: "build"
-        - cel:
-            filter: 'body.ref.contains("refs/heads/") && $(header.X-Github-Event) == "push"'
       bindings:
         - ref: sscs-pipelinebinding
       template:
         ref: sscs-triggertemplate
     - name: release
       interceptors:
+        - cel:
+            filter: 'body.ref.contains("refs/tags/") && $(header.X-Github-Event) == "push"'
         - cel:
             overlays:
               - key: body-json
@@ -125,8 +127,6 @@ spec:
                 expression: "body.ref.split('/')[2]"
               - key: build-type
                 expression: "release"
-        - cel:
-            filter: 'body.ref.contains("refs/tags/") && $(header.X-Github-Event) == "push"'
 
       bindings:
         - ref: sscs-pipelinebinding
