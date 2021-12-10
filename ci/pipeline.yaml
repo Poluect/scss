@@ -18,20 +18,42 @@ spec:
       type: image
     - name: event-to-sink
       type: cloudEvent
+  params:
+    - name: event-type
+      type: string
+      description: Git event type
+    - name: docker-tag
+      type: string
+    - name: branch
+      type: string
+      description: Git branch
+    - name: webhook-body
+      type: string
+      description: Webhook body content
+  workspaces:
+    - name: gocache
+      description: |
+        Cache go dependencies
   tasks:
     - name: build-docker-image
       taskRef:
         name: build-docker-image
-      conditions:
-      - conditionRef: "go-test"
-        resources:
-          - name: source-repo
-            resource: source-repo
+      workspaces:
+        - name: gocache
+          workspace: gocache
       params:
         - name: pathToContext
           value: /workspace/source-repo
         - name: pathToDockerFile
           value: $(resources.inputs.source-repo.path)/build/Dockerfile
+        - name: event-type
+          value: $(params.event-type)
+        - name: branch
+          value: $(params.branch)
+        - name: docker-tag
+          value: $(params.docker-tag)
+        - name: webhook-body
+          value: $(params.webhook-body)
       resources:
         inputs:
           - name: source-repo
@@ -62,15 +84,15 @@ metadata:
   name: deploy-locally
 spec:
   params:
-  - name: namespace
-    default: default
+    - name: namespace
+      default: default
   resources:
     inputs:
       - name: image-source
         type: image
     outputs:
-    - name: event-to-sink
-      type: cloudEvent
+      - name: event-to-sink
+        type: cloudEvent
   steps:
     - name: run-kubectl
       image: lachlanevenson/k8s-kubectl
@@ -90,15 +112,29 @@ metadata:
   name: build-docker-image
   namespace: sscs
 spec:
+  workspaces:
+    - name: gocache
   params:
-  - name: pathToContext
-    description:
-      The build directory used by img
-    default: /workspace/source-repo
-  - name: pathToDockerFile
-    type: string
-    description: The path to the dockerfile to build
-    default: $(resources.inputs.source-repo.path)/Dockerfile
+    - name: goVersion
+      default: "1.17"
+    - name: pathToContext
+      description: The build directory used by img
+      default: /workspace/source-repo
+    - name: pathToDockerFile
+      type: string
+      description: The path to the dockerfile to build
+      default: $(resources.inputs.source-repo.path)/Dockerfile
+    - name: event-type
+      type: string
+      description: Git event type
+    - name: docker-tag
+      type: string
+    - name: branch
+      type: string
+      description: Git branch
+    - name: webhook-body
+      type: string
+      description: Webhook body content
   resources:
     inputs:
       - name: source-repo
@@ -107,11 +143,55 @@ spec:
       - name: builtImage
         type: image
   results:
-  - name: IMAGE_DIGEST
-    description: Digest of the image just built.
-  - name: IMAGE_URL
-    description: URL of the image just built.
+    - name: IMAGE_DIGEST
+      description: Digest of the image just built.
+    - name: IMAGE_URL
+      description: URL of the image just built.
   steps:
+    - name: debug
+      image: bash
+      script: |
+        echo `HOME DIR: $HOME`
+        echo "BODY: $(params.webhook-body)"
+        echo "docker tag: $(params.docker-tag)"
+        echo "event type: $(params.event-type)"
+
+    - name: get-deps
+      image: golang:$(params.goVersion)
+      env:
+        - name: GOMODCACHE
+          value: /workspace/gocache
+      workingDir: "$(params.pathToContext)/src"
+      script: make download
+
+    - name: lint
+      image: golang:$(params.goVersion)
+      workingDir: "$(params.pathToContext)/src"
+      env:
+        - name: GOMODCACHE
+          value: /workspace/gocache
+      script: |
+        set -e
+        result="$(make  lint)"
+        echo "$result"
+        [ -n "$(echo "$result" | grep 'diff -u')" ] && exit 1 || exit 0
+
+    - name: build
+      image: golang:$(params.goVersion)
+      workingDir: "$(params.pathToContext)/src"
+      env:
+        - name: GOMODCACHE
+          value: /workspace/gocache
+      script: make build
+
+    - name: test
+      image: golang:$(params.goVersion)
+      workingDir: "$(params.pathToContext)/src"
+      env:
+        - name: GOMODCACHE
+          value: /workspace/gocache
+      script: make test
+
     - name: build-and-push
       env:
         - name: "DOCKER_CONFIG"
@@ -133,21 +213,6 @@ spec:
         echo $(resources.outputs.builtImage.url) | tee $(results.IMAGE_URL.path)
       securityContext:
         runAsUser: 0
----
-apiVersion: tekton.dev/v1alpha1
-kind: Condition
-metadata:
-  name: go-test
-  namespace: sscs
-spec:
-  resources:
-    - name: source-repo
-      type: git
-  check:
-    image: golang
-    command: ["go"]
-    workingDir: "$(resources.source-repo.path)/src"
-    args: ['test', "./..."]
 ---
 # Finally, we need something to receive our cloudevent announcing success!
 # That is this services only purpose
@@ -177,5 +242,5 @@ metadata:
 spec:
   hostname: event-display
   containers:
-  - image: gcr.io/knative-releases/github.com/knative/eventing-sources/cmd/event_display
-    name: web
+    - image: gcr.io/knative-releases/github.com/knative/eventing-sources/cmd/event_display
+      name: web

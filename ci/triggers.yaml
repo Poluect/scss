@@ -12,6 +12,10 @@ spec:
       description: The git repository url
     - name: namespace
       description: The namespace to create the resources
+    - name: webhook-body
+    - name: webhooks-tekton-git-branch
+    - name: event-type
+    - name: docker-tag
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
@@ -22,21 +26,33 @@ spec:
         serviceAccountName: tekton-triggers-sscs-sa
         pipelineRef:
           name: sscs-pipeline
+        workspaces:
+          - name: gocache # must match workspace name in Task
+            emptyDir: {}
+        params:
+          - name: event-type
+            value: $(tt.params.event-type)
+          - name: docker-tag
+            value: $(tt.params.docker-tag)
+          - name: branch
+            value: $(tt.params.webhooks-tekton-git-branch)
+          - name: webhook-body
+            value: $(tt.params.webhook-body)
         resources:
           - name: source-repo
             resourceSpec:
               type: git
               params:
-              - name: revision
-                value: $(tt.params.gitrevision)
-              - name: url
-                value: $(tt.params.gitrepositoryurl)
+                - name: revision
+                  value: $(tt.params.gitrevision)
+                - name: url
+                  value: $(tt.params.gitrepositoryurl)
           - name: image-source
             resourceSpec:
               type: image
               params:
                 - name: url
-                  value: index.docker.io/skifdh/test:latest # docker-repo-location.com/repo:sscs
+                  value: index.docker.io/skifdh/test:$(tt.params.docker-tag) # docker-repo-location.com/repo:sscs
           - name: event-to-sink
             resourceSpec:
               type: cloudEvent
@@ -57,6 +73,14 @@ spec:
       value: sscs
     - name: gitrepositoryurl
       value: "https://github.com/$(body.repository.full_name)"
+    - name: webhook-body
+      value: $(body)
+    - name: docker-tag
+      value: $(body.webhooks-tekton-image-tag)
+    - name: event-type
+      value: $(header.X-Github-Event)
+    - name: webhooks-tekton-git-branch
+      value: $(body.webhooks-tekton-git-branch)
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
@@ -67,6 +91,6 @@ spec:
   serviceAccountName: tekton-triggers-sscs-sa
   triggers:
     - bindings:
-      - ref: sscs-pipelinebinding
+        - ref: sscs-pipelinebinding
       template:
         ref: sscs-triggertemplate

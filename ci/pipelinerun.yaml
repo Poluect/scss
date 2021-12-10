@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: sscs-pipeline-run-
+  namespace: sscs
+spec:
+  serviceAccountName: tekton-triggers-sscs-sa
+  pipelineRef:
+    name: sscs-pipeline
+  workspaces:
+    - name: gocache # must match workspace name in Task
+      emptyDir: {}
+      # volumeClaimTemplate:
+      #   spec:
+      #     resources:
+      #       requests:
+      #         storage: 5Gi
+      #     volumeMode: Filesystem
+      #     accessModes:
+      #       - ReadWriteOnce
+      # persistentVolumeClaim:
+      #   claimName: mypvc # this PVC must already exist
+      # subPath: my-subdir
+  params:
+    - name: event-type
+      value: push
+    - name: docker-tag
+      value: 74a8962c3f9534b77ea7bf90bed5725f0d064c96
+    - name: branch
+      value: master
+    - name: webhook-body
+      value: ""
+  resources:
+    - name: source-repo
+      resourceSpec:
+        type: git
+        params:
+          - name: revision
+            value: 74a8962c3f9534b77ea7bf90bed5725f0d064c96
+          - name: url
+            value: https://github.com/Poluect/scss
+    - name: image-source
+      resourceSpec:
+        type: image
+        params:
+          - name: url
+            value: index.docker.io/skifdh/test:latest # docker-repo-location.com/repo:sscs
+    - name: event-to-sink
+      resourceSpec:
+        type: cloudEvent
+        params:
+          - name: targetURI
+            value: http://event-display.sscs.svc.cluster.local:8080
