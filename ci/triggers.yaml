@@ -94,14 +94,13 @@ spec:
   triggers:
     - name: cel-trig
       interceptors:
-        - cel:
-            overlays:
-              - key: count_plus_1
-                expression: "body.count + 1.0"
-              - key: count_plus_2
-                expression: "int(body.count) + 2"
-              - key: measure_times_3
-                expression: "body.measure * 3.0"
+        - ref:
+            name: "cel"
+          params:
+            - name: "overlays"
+              value:
+                - key: extensions.body-json
+                  expression: "body.marshalJSON()"
       bindings:
         - ref: sscs-pipelinebinding
       template:
