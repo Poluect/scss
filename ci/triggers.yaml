@@ -99,7 +99,7 @@ spec:
           params:
             - name: "overlays"
               value:
-                - key: extensions.body-json
+                - key: body-json
                   expression: "body.marshalJSON()"
       bindings:
         - ref: sscs-pipelinebinding
