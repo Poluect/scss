@@ -214,7 +214,7 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: oci-sbom.spdx
+          name: oci-sbom.xml
 
       - name: Set release variables
         id: release-vars
@@ -226,8 +226,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: bom-go-mod.spdx
-          asset_name: bom-go-mod.spdx
+          file: gomod-sbom.xml
+          asset_name: gomod-sbom.xml
           tag: ${{ github.ref }}
           body: "go mod SBOM"
 
@@ -235,8 +235,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: oci-sbom.spdx
-          asset_name: oci-sbom.spdx
+          file: oci-sbom.xml
+          asset_name: oci-sbom.xml
           tag: ${{ github.ref }}
           body: "oci SBOM"
 
@@ -283,24 +283,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Generate go.mod SBOM
-      #   uses: CycloneDX/gh-gomod-generate-sbom@v1
-      #   with:
-      #     version: v1
-      #     args: mod -json -output gomod-sbom.json ./src
-
       - name: Generate go.mod SBOM
-        uses: Poluect/gh-action-spdx-sbom-generator@v1.0.1
+        uses: CycloneDX/gh-gomod-generate-sbom@v1
         with:
-          version: "0.0.9"
-        env:
-          INPUT_COMMANDS: "-p ./src"
+          version: v1
+          # TODO: after sbom-actions uses syft version v0.32.0, we can switch to cyclonedx-json output format
+          args: mod -output gomod-sbom.xml ./src
+
+      # - name: Generate go.mod SBOM
+      #   uses: Poluect/gh-action-spdx-sbom-generator@v1.0.1
+      #   with:
+      #     version: "0.0.9"
+      #   env:
+      #     INPUT_COMMANDS: "-p ./src"
 
       - name: Generate oci artifact SBOM
         uses: anchore/sbom-action@v0
         with:
           image: skifdh/test@${{ needs.build.outputs.image_digest }}
-          artifact-name: oci-sbom.spdx
+          # TODO: after sbom-actions uses syft version v0.32.0, we can switch to cyclonedx-json output format
+          format: cyclonedx
+          artifact-name: oci-sbom.xml
           registry-username: ${{ secrets.DOCKER_USERNAME }}
           registry-password: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -309,5 +312,5 @@ jobs:
         with:
           name: gomod-provenance
           path: |
-            bom-go-mod.spdx
-            oci-sbom.spdx
+            gomod-sbom.xml
+            oci-sbom.xml
