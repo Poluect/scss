@@ -15,7 +15,7 @@ spec:
     - name: webhook-body
     - name: webhooks-tekton-git-branch
     - name: event-type
-    - name: docker-tag
+    # - name: docker-tag
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
@@ -33,7 +33,8 @@ spec:
           - name: event-type
             value: $(tt.params.event-type)
           - name: docker-tag
-            value: $(tt.params.docker-tag)
+            # value: $(tt.params.docker-tag)
+            value: latest
           - name: branch
             value: $(tt.params.webhooks-tekton-git-branch)
           - name: webhook-body
@@ -52,7 +53,7 @@ spec:
               type: image
               params:
                 - name: url
-                  value: index.docker.io/skifdh/test:$(tt.params.docker-tag) # docker-repo-location.com/repo:sscs
+                  value: index.docker.io/skifdh/test:$(params.docker-tag) # docker-repo-location.com/repo:sscs
           - name: event-to-sink
             resourceSpec:
               type: cloudEvent
@@ -76,8 +77,8 @@ spec:
     - name: webhook-body
       value: $(body)
     - name: docker-tag
-      value: $(body.webhooks-tekton-image-tag)
-    - name: event-type
+      # value: $(body.webhooks-tekton-image-tag)
+      # - name: event-type
       value: $(header.X-Github-Event)
     - name: webhooks-tekton-git-branch
       value: $(body.webhooks-tekton-git-branch)
