@@ -74,7 +74,7 @@ spec:
     - name: gitrepositoryurl
       value: "https://github.com/$(body.repository.full_name)"
     - name: webhook-body
-      value: $(body)
+      value: $(extensions.body-json)
     - name: docker-tag
       value: latest
       # value: $(body.webhooks-tekton-image-tag)
@@ -96,3 +96,8 @@ spec:
         - ref: sscs-pipelinebinding
       template:
         ref: sscs-triggertemplate
+      interceptors:
+        - cel:
+            overlays:
+              - key: extensions.body-json
+                expression: string(body.marshalJSON())
