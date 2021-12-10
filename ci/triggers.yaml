@@ -97,7 +97,8 @@ spec:
       template:
         ref: sscs-triggertemplate
       interceptors:
-        - cel:
-            overlays:
-              - key: body-json
-                expression: body.marshalJSON()
+        - ref:
+            name: "cel"
+          params:
+            - name: "body-json"
+              value: "body.marshalJSON()"
