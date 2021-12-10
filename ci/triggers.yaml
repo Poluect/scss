@@ -81,7 +81,8 @@ spec:
       # - name: event-type
       value: $(header.X-Github-Event)
     - name: webhooks-tekton-git-branch
-      value: $(body.webhooks-tekton-git-branch)
+      # value: $(body.webhooks-tekton-git-branch)
+      value: main
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
