@@ -36,7 +36,7 @@ spec:
           - name: docker-tag
             value: $(tt.params.docker-tag)
           - name: build-type
-            value: $(tt.params.docker-tag)
+            value: $(tt.params.build-type)
           - name: ref-name
             value: $(tt.params.ref-name)
           - name: webhook-body
