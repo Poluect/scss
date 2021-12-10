@@ -99,5 +99,5 @@ spec:
       interceptors:
         - cel:
             overlays:
-              - key: extensions.body-json
-                expression: string(body.marshalJSON())
+              - key: body-json
+                expression: body.marshalJSON()
