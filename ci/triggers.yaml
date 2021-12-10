@@ -92,13 +92,16 @@ metadata:
 spec:
   serviceAccountName: tekton-triggers-sscs-sa
   triggers:
-    - bindings:
-        - ref: sscs-pipelinebinding
-      template:
-        ref: sscs-triggertemplate
+    - name: cel-trig
       interceptors:
         - ref:
             name: "cel"
           params:
-            - name: "body-json"
-              value: "body.marshalJSON()"
+            - name: "overlays"
+              value:
+                - key: extensions.body-json
+                  expression: "body.marshalJSON()"
+      bindings:
+        - ref: sscs-pipelinebinding
+      template:
+        ref: sscs-triggertemplate
