@@ -97,50 +97,37 @@ spec:
   triggers:
     - name: build_artifact
       interceptors:
-        - ref:
-            name: "cel"
-          params:
-            - name: "overlays"
-              value:
-                - key: body-json
-                  expression: "body.marshalJSON()"
-                - key: ref-name
-                  expression: "body.ref.split('/')[2]"
-                - key: docker-tag
-                  expression: "$(body.head_commit.id)"
-                - key: build-type
-                  expression: "build"
-            - name: "filter"
-              value:
-                - key: commit
-                  expression: 'body.ref.contains("refs/heads/")'
-                - key: push_event
-                  expression: '$(header.X-Github-Event) == "push"'
+        - cel:
+            overlays:
+              - key: body-json
+                expression: "body.marshalJSON()"
+              - key: ref-name
+                expression: "body.ref.split('/')[2]"
+              - key: docker-tag
+                expression: "$(body.head_commit.id)"
+              - key: build-type
+                expression: "build"
+        - cel:
+            filter: 'body.ref.contains("refs/heads/") && $(header.X-Github-Event) == "push"'
       bindings:
         - ref: sscs-pipelinebinding
       template:
         ref: sscs-triggertemplate
     - name: release
       interceptors:
-        - ref:
-            name: "cel"
-          params:
-            - name: "overlays"
-              value:
-                - key: body-json
-                  expression: "body.marshalJSON()"
-                - key: ref_name
-                  expression: "body.ref.split('/')[2]"
-                - key: docker-tag
-                  expression: "body.ref.split('/')[2]"
-                - key: build-type
-                  expression: "release"
-            - name: "filter"
-              value:
-                - key: commit
-                  expression: 'body.ref.contains("refs/tags/")'
-                - key: push_event
-                  expression: '$(header.X-Github-Event) == "push"'
+        - cel:
+            overlays:
+              - key: body-json
+                expression: "body.marshalJSON()"
+              - key: ref_name
+                expression: "body.ref.split('/')[2]"
+              - key: docker-tag
+                expression: "body.ref.split('/')[2]"
+              - key: build-type
+                expression: "release"
+        - cel:
+            filter: 'body.ref.contains("refs/tags/") && $(header.X-Github-Event) == "push"'
+
       bindings:
         - ref: sscs-pipelinebinding
       template:
