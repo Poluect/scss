@@ -108,7 +108,7 @@ spec:
               - key: docker-tag
                 expression: "body.head_commit.id"
               - key: build-type
-                expression: "build"
+                expression: "'build'"
       bindings:
         - ref: sscs-pipelinebinding
       template:
@@ -126,7 +126,7 @@ spec:
               - key: docker-tag
                 expression: "body.ref.split('/')[2]"
               - key: build-type
-                expression: "release"
+                expression: "'release'"
 
       bindings:
         - ref: sscs-pipelinebinding
