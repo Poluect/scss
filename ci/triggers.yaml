@@ -98,7 +98,7 @@ spec:
     - name: build_artifact
       interceptors:
         - cel:
-            filter: 'body.ref.contains("refs/heads/") && header.X-Github-Event == "push"'
+            filter: 'body.ref.contains("refs/heads/") && header.match("X-GitHub-Event", "push")'
         - cel:
             overlays:
               - key: body-json
@@ -116,7 +116,7 @@ spec:
     - name: release
       interceptors:
         - cel:
-            filter: 'body.ref.contains("refs/tags/") && header.X-Github-Event == "push"'
+            filter: 'body.ref.contains("refs/tags/") && header.match("X-GitHub-Event", "push")'
         - cel:
             overlays:
               - key: body-json
