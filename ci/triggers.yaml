@@ -13,7 +13,8 @@ spec:
     - name: namespace
       description: The namespace to create the resources
     - name: webhook-body
-    - name: webhooks-tekton-git-branch
+    - name: ref-name
+    - name: build-type
     - name: event-type
     - name: docker-tag
   resourcetemplates:
@@ -34,8 +35,10 @@ spec:
             value: $(tt.params.event-type)
           - name: docker-tag
             value: $(tt.params.docker-tag)
-          - name: branch
-            value: $(tt.params.webhooks-tekton-git-branch)
+          - name: build-type
+            value: $(tt.params.docker-tag)
+          - name: ref-name
+            value: $(tt.params.ref-name)
           - name: webhook-body
             value: $(tt.params.webhook-body)
         resources:
@@ -76,13 +79,13 @@ spec:
     - name: webhook-body
       value: $(extensions.body-json)
     - name: docker-tag
-      value: latest
-      # value: $(body.webhooks-tekton-image-tag)
+      value: $(extensions.docker-tag)
+    - name: ref-name
+      value: $(extensions.ref-name)
     - name: event-type
       value: $(header.X-Github-Event)
-    - name: webhooks-tekton-git-branch
-      # value: $(body.webhooks-tekton-git-branch)
-      value: main
+    - name: build-type
+      value: $(extensions.build-type)
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
@@ -92,7 +95,7 @@ metadata:
 spec:
   serviceAccountName: tekton-triggers-sscs-sa
   triggers:
-    - name: cel-trig
+    - name: build_artifact
       interceptors:
         - ref:
             name: "cel"
@@ -101,6 +104,43 @@ spec:
               value:
                 - key: body-json
                   expression: "body.marshalJSON()"
+                - key: ref-name
+                  expression: "body.ref.split('/')[2]"
+                - key: docker-tag
+                  expression: "$(body.head_commit.id)"
+                - key: build-type
+                  expression: "build"
+            - name: "filter"
+              value:
+                - key: commit
+                  expression: 'body.ref.contains("refs/heads/")'
+                - key: push_event
+                  expression: '$(header.X-Github-Event) == "push"'
+      bindings:
+        - ref: sscs-pipelinebinding
+      template:
+        ref: sscs-triggertemplate
+    - name: release
+      interceptors:
+        - ref:
+            name: "cel"
+          params:
+            - name: "overlays"
+              value:
+                - key: body-json
+                  expression: "body.marshalJSON()"
+                - key: ref_name
+                  expression: "body.ref.split('/')[2]"
+                - key: docker-tag
+                  expression: "body.ref.split('/')[2]"
+                - key: build-type
+                  expression: "release"
+            - name: "filter"
+              value:
+                - key: commit
+                  expression: 'body.ref.contains("refs/tags/")'
+                - key: push_event
+                  expression: '$(header.X-Github-Event) == "push"'
       bindings:
         - ref: sscs-pipelinebinding
       template:

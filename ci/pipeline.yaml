@@ -22,11 +22,14 @@ spec:
     - name: event-type
       type: string
       description: Git event type
+    - name: ref-name
+      type: string
+      description: Git branch or tag name
+    - name: build-type
+      type: string
+      description: Workflow build type (build or release)
     - name: docker-tag
       type: string
-    - name: branch
-      type: string
-      description: Git branch
     - name: webhook-body
       type: string
       description: Webhook body content
@@ -48,8 +51,10 @@ spec:
           value: $(resources.inputs.source-repo.path)/build/Dockerfile
         - name: event-type
           value: $(params.event-type)
-        - name: branch
-          value: $(params.branch)
+        - name: ref-name
+          value: $(params.ref-name)
+        - name: build-type
+          value: $(params.build-type)
         - name: docker-tag
           value: $(params.docker-tag)
         - name: webhook-body
@@ -127,11 +132,14 @@ spec:
     - name: event-type
       type: string
       description: Git event type
+    - name: ref-name
+      type: string
+      description: Git branch or tag name
+    - name: build-type
+      type: string
+      description: Workflow build type (build or release)
     - name: docker-tag
       type: string
-    - name: branch
-      type: string
-      description: Git branch
     - name: webhook-body
       type: string
       description: Webhook body content
@@ -153,6 +161,8 @@ spec:
       script: |
         echo `HOME DIR: $HOME`
         echo "BODY: $(params.webhook-body)"
+        echo "BODY: $(params.build-type)"
+        echo "BODY: $(params.ref-name)"
         echo "docker tag: $(params.docker-tag)"
         echo "event type: $(params.event-type)"
 
