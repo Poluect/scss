@@ -31,6 +31,10 @@ changelog:
       - "^test:"
 source:
   enabled: true
+sboms:
+  - artifacts: archive
+  - id: source
+    artifacts: source
 signs:
   - cmd: cosign
     signature: "${artifact}.sig"
@@ -41,4 +45,5 @@ signs:
         "--output=${signature}",
         "${artifact}",
       ]
-    artifacts: all
+    artifacts: checksum
+    output: true

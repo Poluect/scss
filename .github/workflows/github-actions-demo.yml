@@ -253,25 +253,25 @@ jobs:
           path: release-assets
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate provenance
-        # uses: slsa-framework/github-actions-demo@main
-        uses: philips-labs/slsa-provenance-action@v0.2.0
-        with:
-          artifact_path: release-assets
-          output_path: "build.provenance"
-          # tag_name: ${{ github.ref_name }}
-          # extra_materials: "gomod-sbom.json"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      # - name: Generate provenance
+      #   # uses: slsa-framework/github-actions-demo@main
+      #   uses: philips-labs/slsa-provenance-action@v0.2.0
+      #   with:
+      #     artifact_path: release-assets
+      #     output_path: "build.provenance"
+      #     # tag_name: ${{ github.ref_name }}
+      #     # extra_materials: "gomod-sbom.json"
+      #   env:
+      #     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Upload binary SBOM to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build.provenance
-          asset_name: build.provenance
-          tag: ${{ github.ref }}
-          body: "binary SBOM"
+      # - name: Upload binary SBOM to release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     file: build.provenance
+      #     asset_name: build.provenance
+      #     tag: ${{ github.ref }}
+      #     body: "binary SBOM"
 
   generate-provenance:
     needs: build
