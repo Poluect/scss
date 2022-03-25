@@ -1,0 +1,3 @@
+artifact_prototypes:
+  docker:
+  - image_url: ghcr.io/poluect/scss
