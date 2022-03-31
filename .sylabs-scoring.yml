@@ -1,3 +1,4 @@
 artifact_prototypes:
   docker:
   - image_url: ghcr.io/poluect/scss
+  - image_url: skifdh/test
